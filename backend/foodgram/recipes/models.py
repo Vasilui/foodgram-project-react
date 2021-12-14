@@ -1,12 +1,14 @@
 from django.conf import settings
 from django.core.validators import MinValueValidator
+from colorfield.fields import ColorField
 from django.db import models
 
 
 class Tag(models.Model):
     title = models.CharField('title', max_length=100, unique=True)
     slug = models.SlugField(max_length=100)
-    color = models.CharField('color', max_length=8, unique=True)
+    color = ColorField(default='#FF0000')
+    objects = models.Manager()
 
     class Meta:
         verbose_name = 'Tag'
@@ -24,6 +26,7 @@ class Ingredient(models.Model):
         db_index=True
     )
     measurement_unit = models.CharField('measurement_unit', max_length=20)
+    objects = models.Manager()
 
     class Meta:
         verbose_name = 'Ingredient'
