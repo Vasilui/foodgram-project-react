@@ -1,7 +1,8 @@
-from api.permissions import AdminOrReadOnly
-from api import serializers
 from rest_framework import filters
+
+from api import serializers
 from api.mixins import ListRetrieveMixin
+from api.permissions import AdminOrReadOnly
 from recipes.models import Tag
 
 
@@ -10,5 +11,5 @@ class TagViewSet(ListRetrieveMixin):
     serializer_class = serializers.TagSerializer
     permission_classes = (AdminOrReadOnly,)
     filter_backends = (filters.SearchFilter, filters.OrderingFilter,)
-    search_fields = ('title',)
-    ordering = ('title',)
+    search_fields = ('name',)
+    ordering = ('name',)

@@ -1,8 +1,8 @@
 import csv
 import os
 
-from django.conf import settings
 from django.core.management.base import BaseCommand
+
 from recipes.models import Ingredient
 
 NAME_MODEL_FILE = {
@@ -15,7 +15,7 @@ class Command(BaseCommand):
 
     @staticmethod
     def get_csv_file(filename):
-        return os.path.join(settings.BASE_DIR.parent.parent, 'data', filename)
+        return os.path.join('./data', filename)
 
     @staticmethod
     def clear_model(model):
@@ -41,7 +41,7 @@ class Command(BaseCommand):
         self.print_to_terminal(f'{line - 1} objects added to {model_name}')
 
     def load_data(self):
-        self.load_model('ingredient', ['title', 'measurement_unit'])
+        self.load_model('ingredient', ['name', 'measurement_unit'])
 
     def handle(self, *args, **kwargs):
         self.load_data()

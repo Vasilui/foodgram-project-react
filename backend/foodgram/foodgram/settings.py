@@ -1,5 +1,5 @@
-from pathlib import Path
 import os
+from pathlib import Path
 
 SECRET_KEY = os.environ.get('SECRET_KEY'),
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -23,6 +23,7 @@ INSTALLED_APPS = [
     'django_filters',
     'djoser',
     'colorfield',
+    'wkhtmltopdf',
 ]
 
 MIDDLEWARE = [
@@ -105,10 +106,11 @@ REST_FRAMEWORK = {
         'rest_framework.authentication.TokenAuthentication',
     ),
     'DEFAULT_FILTER_BACKENDS': [
-        'django_filters.rest_framework.DjangoFilterBackend'],
+        'django_filters.rest_framework.DjangoFilterBackend'
+    ],
     'DEFAULT_PERMISSION_CLASSES': [
-        'rest_framework.permissions.IsAuthenticated',
-    ]
+        'rest_framework.permissions.AllowAny',
+    ],
 }
 
 DJOSER = {
@@ -123,6 +125,11 @@ DJOSER = {
         'user': ('rest_framework.permissions.IsAuthenticated',),
         'user_list': ('rest_framework.permissions.AllowAny',)
     }
+}
+
+WKHTMLTOPDF_CMD = '/usr/local/bin/wkhtmltopdf'
+WKHTMLTOPDF_CMD_OPTIONS = {
+    'quiet': True,
 }
 
 AUTH_USER_MODEL = 'users.CustomUser'

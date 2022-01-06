@@ -1,14 +1,19 @@
-from api.permissions import AdminOrReadOnly
+from django_filters import rest_framework
+from rest_framework import viewsets
+
 from api import serializers
-from rest_framework import filters
+from api.filters import IngredientFilter
 from api.mixins import ListRetrieveMixin
-from recipes.models import Ingredient
+from recipes.models import Ingredient, IngredientAmount
 
 
 class IngredientViewSet(ListRetrieveMixin):
     queryset = Ingredient.objects.all()
-    serializer_class = serializers.IngredientSerializer
-    permission_classes = (AdminOrReadOnly,)
-    filter_backends = (filters.SearchFilter, filters.OrderingFilter,)
-    search_fields = ('title',)
-    ordering = ('title',)
+    serializer_class = serializers.IngredientReadSerializer
+    filter_backends = (rest_framework.DjangoFilterBackend,)
+    filterset_class = IngredientFilter
+
+
+class IngredientAmountViewSet(viewsets.ModelViewSet):
+    queryset = IngredientAmount.objects.all()
+    serializer_class = serializers.IngredientAmountSerializer
