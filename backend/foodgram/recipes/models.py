@@ -5,12 +5,22 @@ from colorfield.fields import ColorField
 
 
 class Tag(models.Model):
-    name = models.CharField('Название', max_length=100, unique=True)
-    slug = models.SlugField(max_length=100)
-    color = ColorField(default='#FF0000')
-    objects = models.Manager()
+    name = models.CharField(
+        verbose_name='Название',
+        max_length=100,
+        unique=True
+    )
+    slug = models.SlugField(max_length=100, verbose_name='Слаг')
+    color = ColorField(default='#FF0000', verbose_name='Цвет')
 
     class Meta:
+        constraints = [
+            models.UniqueConstraint(
+                fields=('name', 'slug'),
+                name='unique_tag_name_slug'
+            )
+        ]
+
         verbose_name = 'Тэг'
         verbose_name_plural = 'Тэги'
         ordering = ('name',)
@@ -21,12 +31,14 @@ class Tag(models.Model):
 
 class Ingredient(models.Model):
     name = models.CharField(
-        'Название',
+        verbose_name='Название',
         max_length=250,
         db_index=True
     )
-    measurement_unit = models.CharField('ед. изм.', max_length=20)
-    objects = models.Manager()
+    measurement_unit = models.CharField(
+        verbose_name='ед. изм.',
+        max_length=20
+    )
 
     class Meta:
         verbose_name = 'Ингредиент'
@@ -71,13 +83,13 @@ class Recipe(models.Model):
         related_name='recipes',
         verbose_name='Автор'
     )
-    name = models.CharField('Название', max_length=256)
+    name = models.CharField(verbose_name='Название', max_length=256)
     image = models.ImageField(
-        'Картинка',
+        verbose_name='Картинка',
         help_text='Загрузить картинку',
         upload_to='recipes/images/'
     )
-    text = models.TextField('Описание')
+    text = models.TextField(verbose_name='Описание')
     ingredients = models.ManyToManyField(
         Ingredient,
         through='IngredientAmount',
@@ -92,7 +104,10 @@ class Recipe(models.Model):
         validators=[MinValueValidator(1)],
         verbose_name='Время приготовления'
     )
-    pub_date = models.DateTimeField('Дата создания', auto_now_add=True)
+    pub_date = models.DateTimeField(
+        verbose_name='Дата создания',
+        auto_now_add=True
+    )
     objects = models.Manager()
     recipe_obj = RecipeManage.as_manager()
 
@@ -128,11 +143,15 @@ class FavouriteRecipe(models.Model):
         default=False,
         verbose_name='В списке покупок'
     )
-    is_favorited = models.BooleanField('Избранное', default=False)
-    add_to_favorite = models.DateTimeField('Добавить в избранное',
-                                           auto_now_add=True)
-    add_to_shopping_cart = models.DateTimeField('Добавить с список покупок',
-                                                auto_now_add=True)
+    is_favorited = models.BooleanField(verbose_name='Избранное', default=False)
+    add_to_favorite = models.DateTimeField(
+        verbose_name='Добавить в избранное',
+        auto_now_add=True
+    )
+    add_to_shopping_cart = models.DateTimeField(
+        verbose_name='Добавить с список покупок',
+        auto_now_add=True
+    )
     objects = models.Manager()
 
     class Meta:
@@ -166,9 +185,8 @@ class IngredientAmount(models.Model):
     )
     amount = models.PositiveSmallIntegerField(
         validators=[MinValueValidator(1)],
-        verbose_name='ingredient amount'
+        verbose_name='Количество'
     )
-    objects = models.Manager()
 
     class Meta:
         constraints = [

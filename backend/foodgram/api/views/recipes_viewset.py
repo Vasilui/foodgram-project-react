@@ -1,6 +1,5 @@
 from django.contrib.auth import get_user_model
 from django.db.models import Sum
-# from django.http import HttpResponse
 from django.shortcuts import get_object_or_404
 from django.template.loader import get_template
 from django_filters import rest_framework as filters
@@ -30,7 +29,7 @@ class RecipeViewSet(ListRetrieveMixin):
     def get_queryset(self):
         if not self.request.user.is_authenticated:
             return Recipe.objects.all()
-        user = get_object_or_404(User, id=self.request.user.id)
+        user = self.request.user
         return Recipe.recipe_obj.with_favorite_and_shopping_cart(user=user)
 
     def get_serializer_class(self):
@@ -60,7 +59,8 @@ class RecipeViewSet(ListRetrieveMixin):
                 user=user,
                 recipe=recipe,
                 defaults={
-                    'user': user, 'recipe': recipe,
+                    'user': user,
+                    'recipe': recipe,
                     'is_in_shopping_cart': True
                 },
             )
@@ -103,10 +103,6 @@ class RecipeViewSet(ListRetrieveMixin):
                 'ingredients__measurement_unit'
             ]
             shopping_list[title] = count
-        # data = ''
-        # for key, value in shopping_list.items():
-        #     data += f'{key} - {value}\n'
-        # return HttpResponse(data, content_type='text/plain')
         template = get_template("shopping_cart.html")
         return PDFTemplateResponse(
             request=request,
