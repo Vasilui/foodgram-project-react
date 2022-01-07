@@ -22,7 +22,7 @@ services:
   backend:
     build:
       context: ..
-      dockerfile: backend/Dockerfile
+      dockerfile: ../Dockerfile
     command: bash -c "
       python manage.py migrate
       && gunicorn foodgram.wsgi:application --bind 0:8000
