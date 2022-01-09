@@ -6,7 +6,6 @@ from api.serializers.ingredient_serializer import (IngredientAmountSerializer,
                                                    IngredientWriteSerializer)
 from api.serializers.tag_serializers import TagSerializer
 from api.serializers.user_serializer import CustomUserSerializer
-from api.utils import create_recipe, update_recipe
 from recipes.models import Ingredient, Recipe, Tag
 
 
@@ -26,6 +25,17 @@ class RecipeReadSerializer(serializers.ModelSerializer):
         fields = '__all__'
 
 
+def add_ingredients(recipe_instance, ingredients):
+    for ingredient in ingredients:
+        ingredient_obj = get_object_or_404(
+            Ingredient, id=ingredient.get('id')
+        )
+        recipe_instance.ingredients.add(
+            ingredient_obj,
+            through_defaults={'amount': ingredient.get('amount')}
+        )
+
+
 class RecipeWriteSerializer(serializers.ModelSerializer):
     name = serializers.CharField(max_length=150)
     text = serializers.CharField(max_length=1000)
@@ -43,13 +53,41 @@ class RecipeWriteSerializer(serializers.ModelSerializer):
     is_favorited = serializers.BooleanField(read_only=True)
 
     def create(self, validated_data):
-        return create_recipe(validated_data)
+        author = validated_data.get('author')
+        name = validated_data.get('name')
+        if Recipe.objects.filter(author=author, name=name).exists():
+            raise exceptions.ValidationError(
+                'Рецепт с таким названием уже существует.'
+            )
+        ingredient_data = validated_data.pop('ingredients')
+        tags_data = validated_data.pop('tags')
+        tags = [get_object_or_404(Tag, id=tag.id) for tag in tags_data]
+
+        new_recipe = Recipe.objects.create(**validated_data)
+        new_recipe.tags.add(*tags)
+        add_ingredients(new_recipe, ingredient_data)
+
+        new_recipe.save()
+        return new_recipe
 
     def update(self, instance, validated_data):
-        new_instance = update_recipe(validated_data, instance)
-        super(RecipeWriteSerializer, self).update(new_instance, validated_data)
-        new_instance.save()
-        return new_instance
+        instance.image = validated_data.get('image', instance.image)
+        instance.name = validated_data.get('name', instance.name)
+        instance.text = validated_data.get('text', instance.text)
+        instance.cooking_time = validated_data.get(
+            'cooking_time', instance.cooking_time
+        )
+        tags_data = validated_data.pop('tags')
+        tags = [get_object_or_404(Tag, id=tag.id) for tag in tags_data]
+        ingredients_data = validated_data.get('ingredients')
+
+        instance.tags.clear()
+        instance.ingredients.clear()
+        instance.tags.add(*tags)
+
+        add_ingredients(instance, ingredients_data)
+        instance.save()
+        return instance
 
     def to_representation(self, instance):
         return RecipeReadSerializer(instance, context=self.context).data
