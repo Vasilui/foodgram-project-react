@@ -152,7 +152,6 @@ class FavouriteRecipe(models.Model):
         verbose_name='Добавить с список покупок',
         auto_now_add=True
     )
-    objects = models.Manager()
 
     class Meta:
         constraints = [

@@ -53,12 +53,6 @@ class RecipeWriteSerializer(serializers.ModelSerializer):
     is_favorited = serializers.BooleanField(read_only=True)
 
     def create(self, validated_data):
-        author = validated_data.get('author')
-        name = validated_data.get('name')
-        if Recipe.objects.filter(author=author, name=name).exists():
-            raise exceptions.ValidationError(
-                'Рецепт с таким названием уже существует.'
-            )
         ingredient_data = validated_data.pop('ingredients')
         tags_data = validated_data.pop('tags')
         tags = [get_object_or_404(Tag, id=tag.id) for tag in tags_data]
@@ -71,21 +65,16 @@ class RecipeWriteSerializer(serializers.ModelSerializer):
         return new_recipe
 
     def update(self, instance, validated_data):
-        instance.image = validated_data.get('image', instance.image)
-        instance.name = validated_data.get('name', instance.name)
-        instance.text = validated_data.get('text', instance.text)
-        instance.cooking_time = validated_data.get(
-            'cooking_time', instance.cooking_time
-        )
         tags_data = validated_data.pop('tags')
         tags = [get_object_or_404(Tag, id=tag.id) for tag in tags_data]
-        ingredients_data = validated_data.get('ingredients')
+        ingredients_data = validated_data.pop('ingredients')
 
         instance.tags.clear()
         instance.ingredients.clear()
         instance.tags.add(*tags)
 
         add_ingredients(instance, ingredients_data)
+        super(RecipeWriteSerializer, self).update(instance, validated_data)
         instance.save()
         return instance
 
@@ -95,7 +84,13 @@ class RecipeWriteSerializer(serializers.ModelSerializer):
     def validate(self, data):
         ingredients = data.get('ingredients')
         tags = data.get('tags')
+        author = data.get('author')
+        name = data.get('name')
         ingredients_id = [ingredient['id'] for ingredient in ingredients]
+        if Recipe.objects.filter(author=author, name=name).exists():
+            raise exceptions.ValidationError(
+                'Рецепт с таким названием уже существует.'
+            )
         if len(ingredients_id) != len(set(ingredients_id)):
             raise exceptions.ValidationError(
                 'Ингредиенты в рецепте не должны повторяться'
