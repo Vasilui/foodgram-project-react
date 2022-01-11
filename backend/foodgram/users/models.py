@@ -23,11 +23,16 @@ class CustomUserManager(UserManager):
         user.save(using=self._db)
         return user
 
+    class Meta:
+        verbose_name = 'Пользователь'
+        verbose_name_plural = 'Пользователи'
+        ordering = ('username',)
+
 
 class CustomUser(AbstractUser):
     is_admin = models.BooleanField(default=False)
-    first_name = models.CharField('first name', max_length=150)
-    last_name = models.CharField('last name', max_length=150)
+    first_name = models.CharField('Имя', max_length=150)
+    last_name = models.CharField('Фамилия', max_length=150)
     email = models.EmailField('email address', unique=True)
     is_active = models.BooleanField(default=True, blank=True)
     username = models.CharField('username', max_length=150, unique=True)

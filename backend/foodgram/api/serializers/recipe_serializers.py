@@ -101,9 +101,9 @@ class RecipeWriteSerializer(serializers.ModelSerializer):
             )
         for ingredient in ingredients:
             amount = ingredient.get('amount')
-            if not amount:
+            if not amount and ingredient.measurement_unit != 'по вкусу':
                 raise exceptions.ValidationError(
-                    'У каждого интгредиента должно быть указано количество.'
+                    'У интгредиента должно быть указано количество.'
                 )
             if amount <= 0:
                 raise exceptions.ValidationError(
