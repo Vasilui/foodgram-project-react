@@ -7,7 +7,6 @@ RUN pip install -U pip
 RUN pip install -r requirements.txt
 
 COPY backend/foodgram .
-COPY data ./data
 
 RUN wget https://github.com/wkhtmltopdf/packaging/releases/download/0.12.6-1/wkhtmltox_0.12.6-1.buster_amd64.deb
 RUN dpkg -i wkhtmltox_0.12.6-1.buster_amd64.deb || true

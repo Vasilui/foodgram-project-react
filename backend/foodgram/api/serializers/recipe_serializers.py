@@ -86,6 +86,7 @@ class RecipeWriteSerializer(serializers.ModelSerializer):
         tags = data.get('tags')
         author = data.get('author')
         name = data.get('name')
+        cooking_time = data.get('cooking_time')
         ingredients_id = [ingredient['id'] for ingredient in ingredients]
         if Recipe.objects.filter(author=author, name=name).exists():
             raise exceptions.ValidationError(
@@ -98,6 +99,10 @@ class RecipeWriteSerializer(serializers.ModelSerializer):
         if len(tags) != len(set(tags)):
             raise exceptions.ValidationError(
                 'Теги в рецепте не должны повторяться'
+            )
+        if cooking_time < 1:
+            raise exceptions.ValidationError(
+                'Время приготовления не может быть меньше 1 минуты'
             )
         for ingredient in ingredients:
             amount = ingredient.get('amount')
